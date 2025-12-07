@@ -86,7 +86,7 @@ else
 
     # ---->>>> Instalar el KINGVPN Painel
     show_progress "Instalando KING•VPN, la demora dependera de la capacidad de tu vps..."
-    git clone --branch "main" https://github.com/InterKing000/kingvpn.git /root/KINGVPN >/dev/null 2>&1 || error_exit "Falla al clonar el panel KING•VPN"
+    git clone --branch "main" https://github.com/interking000/kingvpn.git /root/KINGVPN >/dev/null 2>&1 || error_exit "Falla al clonar el panel KING•VPN"
     mv /root/KINGVPN/menu /opt/kingvpn/menu || error_exit "Falla al mover el menu"
     cd /root/KINGVPN/KINGVPN/ || error_exit "Falla al entrar al directorio king"
     npm install -g typescript >/dev/null 2>&1 || error_exit "Falla al instalar TypeScript"
