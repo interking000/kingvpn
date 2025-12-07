@@ -11,7 +11,7 @@ show_progress() {
 
 error_exit() {
     echo -e "\nError: $1"
-    exit 0
+    exit 1
 }
 
 increment_step() {
@@ -22,13 +22,13 @@ if [ "$EUID" -ne 0 ]; then
     error_exit "EJECUTE COMO ROOT"
 else
     clear
-    show_progress "Actualizando repositorio..."
+    show_progress "Actualizando repositorio de paquetes..."
     export DEBIAN_FRONTEND=noninteractive
     apt update -y >/dev/null 2>&1 || error_exit "Falla al actualizar el repositorio"
     increment_step
 
-    # ---->>>> Verificación del sistema
-    show_progress "Verificando el sistema..."
+    # Verificación del sistema
+    show_progress "Verificando sistema y dependencias..."
     if ! command -v lsb_release &> /dev/null; then
         apt install lsb-release -y >/dev/null 2>&1 || error_exit "Falla al instalar lsb-release"
     fi
@@ -40,78 +40,77 @@ else
     case $OS_NAME in
         Ubuntu)
             case $VERSION in
-                24.*|22.*|20.*)
-                    show_progress "Sistema Ubuntu soportado, continuando..."
+                20.*|22.*|24.*)
+                    show_progress "Sistema soportado, continuando..."
                     ;;
                 *)
-                    error_exit "Version de Ubuntu no soportado. Use 20, 22 o 24."
+                    error_exit "Version de Ubuntu no soportado"
                     ;;
             esac
             ;;
         Debian)
             case $VERSION in
-                12*|11*)
-                    show_progress "Sistema Debian soportado, continuando..."
+                11*|12*)
+                    show_progress "Sistema soportado, continuando..."
                     ;;
                 *)
-                    error_exit "Version de Debian no soportado. 11 o 12."
+                    error_exit "Version de Debian no soportado"
                     ;;
             esac
             ;;
         *)
-            error_exit "Sistema no soportado. use Ubuntu o Debian."
+            error_exit "Sistema no soportado. Use Ubuntu o Debian."
             ;;
     esac
     increment_step
 
-    # ---->>>> Instalacion de paquetes requisito y actualización del sistema
-    show_progress "Actualizando el sistema..."
-    apt upgrade -y >/dev/null 2>&1 || error_exit "Falla al actualizar el sistema"
-    apt-get install wget git -y >/dev/null 2>&1 || error_exit "Falla al instalar paquetes"
+    # Instalación de paquetes y actualización
+    show_progress "Actualizando sistema e instalando dependencias..."
+    apt upgrade -y >/dev/null 2>&1 || error_exit "Falla al actualizar sistema"
+    apt install wget git -y >/dev/null 2>&1 || error_exit "Falla al instalar paquetes"
     increment_step
 
-    # ---->>>> Creando el directorio del script
+    # Crear directorio
     show_progress "Creando directorio /opt/kingvpn..."
-    mkdir -p /opt/kingvpn >/dev/null 2>&1 || error_exit "Falla al crear el directorio"
+    mkdir -p /opt/kingvpn >/dev/null 2>&1 || error_exit "Falla al crear directorio"
     increment_step
 
-    # ---->>>> Instalar Node.js
-    show_progress "Instalando Node.js 18..."
+    # Instalar Node.js con NVM
+    show_progress "Instalando Node.js 18 con NVM..."
     bash <(wget -qO- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.0/install.sh) >/dev/null 2>&1 || error_exit "Falla al instalar NVM"
-    [ -s "/root/.nvm/nvm.sh" ] && \. "/root/.nvm/nvm.sh" || error_exit "Falla al cargar NVM"
+    [ -s "$HOME/.nvm/nvm.sh" ] && \. "$HOME/.nvm/nvm.sh" || error_exit "Falla al cargar NVM"
     nvm install 18 >/dev/null 2>&1 || error_exit "Falla al instalar Node.js"
     increment_step
 
-    # ---->>>> Clonar KINGVPN usando HTTPS
-    show_progress "Instalando KING•VPN, la demora dependera de la capacidad de tu VPS..."
-    
-    # Si ya existe, limpiar carpeta
-    if [ -d "/root/KINGVPN" ]; then
-        rm -rf /root/KINGVPN
-    fi
+    # Clonar KINGVPN usando HTTPS
+    show_progress "Clonando KING•VPN..."
+    [ -d "/root/KINGVPN" ] && rm -rf /root/KINGVPN
+    git clone --branch main https://github.com/interking000/kingvpn.git /root/KINGVPN >/dev/null 2>&1 || error_exit "Falla al clonar KINGVPN"
 
-    git clone --branch main https://github.com/interking000/kingvpn.git /root/KINGVPN >/dev/null 2>&1 || error_exit "Falla al clonar el panel KING•VPN"
+    # Mover menú
+    mv /root/KINGVPN/menu /opt/kingvpn/menu || error_exit "Falla al mover menu"
 
-    mv /root/KINGVPN/menu /opt/kingvpn/menu || error_exit "Falla al mover el menu"
-    
-    # Ajuste de ruta final según tu repo
-    cd /root/KINGVPN/ || error_exit "Falla al entrar al directorio KINGVPN"
+    # Entrar al repositorio
+    cd /root/KINGVPN || error_exit "Falla al entrar al directorio KINGVPN"
+
+    # Instalar TypeScript y dependencias Node
     npm install -g typescript >/dev/null 2>&1 || error_exit "Falla al instalar TypeScript"
-    npm install --force >/dev/null 2>&1 || error_exit "Falla al instalar paquetes de KING•VPN"
-    
-    mv /root/KINGVPN/* /opt/kingvpn/ || error_exit "Falla al mover archivos de KINGVPN"
+    npm install --force >/dev/null 2>&1 || error_exit "Falla al instalar dependencias KINGVPN"
+
+    # Mover todos los archivos al directorio final
+    mv /root/KINGVPN/* /opt/kingvpn/ || error_exit "Falla al mover archivos al directorio final"
     increment_step
 
-    # ---->>>> Configuración de permisos
+    # Configurar permisos
     show_progress "Configurando permisos..."
     chmod +x /opt/kingvpn/menu || error_exit "Falla al configurar permisos"
     ln -sf /opt/kingvpn/menu /usr/local/bin/menu || error_exit "Falla al crear link simbólico"
     increment_step
 
-    # ---->>>> Limpieza
-    show_progress "Limpiando directorios temporarios..."
-    rm -rf /root/KINGVPN/ || error_exit "Falla al limpiar directorio temporario"
+    # Limpieza
+    show_progress "Limpiando archivos temporales..."
+    rm -rf /root/KINGVPN >/dev/null 2>&1 || error_exit "Falla al limpiar directorio temporal"
     increment_step
 
-    echo "Instalacion completada con exito. Digite 'menu' para acceder al menu."
+    echo "Instalación completada con éxito. Digite 'menu' para acceder al panel."
 fi
