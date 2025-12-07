@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="es-AR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="csrf-token" content="<%= it.csrfToken %>">
+  <title>KingVPN - Login</title>
+
+  <!-- Bootstrap -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css" />
+  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+  <link href="../static/css/signin.css" rel="stylesheet" />
+  <link href="../static/css/bootstrap.css" rel="stylesheet" />
+
+  <style>
+    body {
+      background: radial-gradient(circle at top, #0c0c0c, #000000 70%);
+      color: #fff;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: "Poppins", sans-serif;
+    }
+
+    .card-custom {
+      background: rgba(20, 20, 20, 0.85);
+      border-radius: 25px;
+      padding: 35px;
+      box-shadow: 0 0 35px rgba(255, 0, 80, 0.5);
+      width: 100%;
+      max-width: 380px;
+      backdrop-filter: blur(12px);
+    }
+
+    .title-logo {
+      font-size: 1.9rem;
+      font-weight: 900;
+      background: linear-gradient(90deg, #ff004c, #ff2ea6, #ff0059);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0px 0px 18px rgba(255, 0, 80, 0.8);
+      letter-spacing: 2px;
+      margin-bottom: 20px;
+    }
+
+    .shadow-text {
+      text-shadow: 0 0 12px rgba(255, 255, 255, 0.4);
+    }
+
+    .form-control {
+      background: #0f0f0f;
+      border: 1px solid #333;
+      color: #fff;
+      border-radius: 12px;
+      padding: 12px;
+      box-shadow: inset 0 0 12px #000;
+    }
+
+    .form-control:focus {
+      background: #161616;
+      box-shadow: 0 0 12px #ff006a;
+      border-color: #ff006a;
+      color: white;
+    }
+
+    .btn-login {
+      background: linear-gradient(90deg, #ff0048, #ff0077);
+      border: none;
+      border-radius: 15px;
+      padding: 12px;
+      font-size: 1.1rem;
+      font-weight: bold;
+      box-shadow: 0 0 18px rgba(255, 0, 95, 0.8);
+      transition: 0.2s;
+    }
+
+    .btn-login:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 25px rgba(255, 0, 120, 1);
+    }
+
+    .social-btn i {
+      font-size: 1.6rem;
+      padding: 10px 14px;
+      border-radius: 12px;
+      background: #111;
+      transition: 0.2s;
+    }
+
+    .social-btn i:hover {
+      transform: scale(1.15);
+      background: #ff0055;
+      box-shadow: 0 0 12px #ff0055;
+    }
+
+    .spinner-border {
+      filter: drop-shadow(0 0 8px #ff006a);
+    }
+  </style>
+</head>
+
+<body>
+  <main class="text-center form-signin">
+    <div class="card-custom">
+      <h1 class="title-logo">BIENVENIDO A KING VPN</h1>
+      <img class="mb-3 rounded-circle shadow-text" src="/static/img/icon.jpg" width="80" height="80" />
+
+      <div class="__spinner" style="display:none;">
+        <div class="spinner-border text-light p-4 mb-3" role="status"></div>
+      </div>
+
+      <div class="card-body __inputs">
+        <form role="form" action="/login" method="POST" class="pt-3">
+
+          <div class="text-start mb-3">
+            <label class="form-label shadow-text">Usuario</label>
+            <input class="form-control" id="username" name="username" placeholder="Ingrese su usuario" required />
+          </div>
+
+          <div class="text-start mb-4">
+            <label class="form-label shadow-text">Contraseña</label>
+            <input class="form-control" id="password" name="password" type="password" placeholder="••••••••" required />
+          </div>
+
+          <button type="submit" id="login" class="btn-login w-100 mb-3 d-flex align-items-center justify-content-center">
+            Entrar
+          </button>
+
+          <p><a href="/register" class="text-white-50">¿No tienes cuenta?</a></p>
+
+          <div class="d-flex justify-content-center gap-3 mt-3">
+            <a class="social-btn" href="https://wa.me/54937651427065"><i class="bi bi-telegram text-light"></i></a>
+            <a class="social-btn" href="https://wa.me/54937651427065"><i class="bi bi-whatsapp text-success"></i></a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </main>
+
+  <!-- Scripts originales restaurados -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+  <script src="../static/js/utils.js"></script>
+
+  <script>
+    const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+    const showSpinner = () => {
+      document.querySelector('.__spinner').style.display = 'block';
+      document.querySelector('.__inputs').style.display = 'none';
+    }
+
+    const closeSpinner = () => {
+      document.querySelector('.__spinner').style.display = 'none';
+      document.querySelector('.__inputs').style.display = 'block';
+    }
+
+    showSpinner();
+    setTimeout(() => closeSpinner(), 500);
+
+    let csrfToken = getCsrfTokenHead();
+
+    const form = document.querySelector('form');
+    form.addEventListener('submit', async e => {
+      e.preventDefault();
+
+      showSpinner();
+
+      const formData = new FormData(form);
+      const body = Object.fromEntries(formData);
+
+      const response = await fetch(form.action, {
+        method: 'POST',
+        body: JSON.stringify(body),
+        headers: {
+          'csrf-token': csrfToken,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      const data = await response.json();
+
+      if (data.status == 200) {
+        showToastSuccess(data.message);
+        setTimeout(() => { window.location.href = '/'; }, 1000);
+        return;
+      }
+
+      const csrfTokenRefresh = getCsrfTokenRefresh(response);
+      if (csrfTokenRefresh) csrfToken = csrfTokenRefresh;
+
+      showToastError(data.message);
+      closeSpinner();
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,142 @@
+#!/bin/bash
+
+PORT_FILE="/opt/kingvpn/port"
+
+# Funcion para verificar si un puerto esta en uso
+is_port_in_use() {
+    local port=$1
+    if lsof -i :$port > /dev/null 2>&1; then
+        return 0
+    else
+        return 1
+    fi
+}
+
+# Funcion para iniciar el panel
+start_kingvpn_panel() {
+    local port=$1
+
+    if is_port_in_use $port; then
+        echo "El puerto $puerto ya está en uso."
+        return
+    fi
+    
+    cd /opt/kingvpn/
+
+    # Cargar NVM
+    [ -s "/root/.nvm/nvm.sh" ] && \. "/root/.nvm/nvm.sh"
+
+    # Crear archivo .env
+    rm -rf /opt/kingvpn/.env
+    echo "PORT=$port" > /opt/kingvpn/.env
+    echo "NODE_ENV=\"production\"" >> /opt/kingvpn/.env
+    echo "DATABASE_URL=\"file:/opt/kingvpn/prisma/database.db\"" >> /opt/kingvpn/.env
+    token1=$(node -e "console.log(require('crypto').randomBytes(100).toString('base64'));")
+    token2=$(node -e "console.log(require('crypto').randomBytes(100).toString('base64'));")
+    token3=$(node -e "console.log(require('crypto').randomBytes(100).toString('base64'));")
+    echo "CSRF_SECRET=\"$token1\"" >> /opt/kingvpn/.env
+    echo "JWT_SECRET_KEY=\"$token2\"" >> /opt/kingvpn/.env
+    echo "JWT_SECRET_REFRESH=\"$token3\"" >> /opt/kingvpn/.env
+    echo "ENCRYPT_FILES=\"7223fd56-e21d-4191-8867-f3c67601122a\"" >> /opt/kingvpn/.env
+
+    npm run build
+    npx prisma migrate dev
+
+    # Crear servicio systemd
+    local command="/root/.nvm/versions/node/v18.*/bin/npm --prefix /opt/kingvpn/ run start"
+    local service_file_path="/etc/systemd/system/kingvpn.service"
+    local service_file_content="[Unit]
+Description=KINGVPN Panel
+After=network.target
+
+[Service]
+LimitNOFILE=infinity
+LimitNPROC=infinity
+LimitMEMLOCK=infinity
+Environment=NVM_DIR=/root/.nvm
+Environment=PATH=/root/.nvm/versions/node/v18.*/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+Type=simple
+ExecStart=${command}
+Restart=always
+WorkingDirectory=/opt/kingvpn/
+
+[Install]
+WantedBy=multi-user.target"
+
+    echo "$service_file_content" > "$service_file_path"
+    systemctl daemon-reload
+    systemctl enable "kingvpn.service"
+    systemctl start "kingvpn.service"
+
+    # Guardar el puerto
+    echo $port > "$PORT_FILE"
+    echo "KINGVPN iniciado con éxito."
+}
+
+# Funcion para detener el panel
+stop_kingvpn_panel() {
+    systemctl disable "kingvpn.service"
+    systemctl stop "kingvpn.service"
+    rm -f "/etc/systemd/system/kingvpn.service"
+    systemctl daemon-reload
+
+    rm -f "$PORT_FILE"
+    echo "KINGVPN detenido con éxito."
+}
+
+# Funcion para mostrar el menu
+show_menu() {
+    clear
+    echo "------------------------------------------------"
+    printf "|                 %-29s|\n" "KING•VPN PANEL"
+    echo "------------------------------------------------"
+
+    STATUS=0
+    if [ ! -s "$PORT_FILE" ]; then
+        printf "| Estado: %-36s|\n" "Inactivo"
+    else
+        PORT=$(cat $PORT_FILE)
+        STATUS=1
+        printf "| Acceso: %-36s|\n" "http://$(wget -qO- ipinfo.io/ip):$PORT"
+    fi
+
+    echo "------------------------------------------------"
+    if [ "$STATUS" -eq 0 ]; then 
+        printf "| %-45s|\n" "1 - Iniciar Panel"
+    else
+        printf "| %-45s|\n" "1 - Detener Panel"
+    fi
+    printf "| %-45s|\n" "0 - Salir"
+    echo "------------------------------------------------"
+    echo
+    read -p " --> Seleccione una opción: " option
+
+    case $option in
+        1)
+            if [ "$STATUS" -eq 0 ]; then 
+                read -p "Puerto del panel: " port
+                while ! [[ $port =~ ^[0-9]+$ ]]; do
+                    echo "Ingrese un puerto válido."
+                    read -p "Puerto del panel: " port
+                done
+                start_kingvpn_panel $port
+                read -p "> Iniciado. Presione ENTER para volver." dummy
+            else
+                stop_kingvpn_panel
+                read -p "> Detenido. Presione ENTER para volver." dummy
+            fi
+            ;;
+        0)
+            exit 0
+            ;;
+        *)
+            echo "Opción inválida. Presione ENTER."
+            read dummy
+            ;;
+    esac
+}
+
+# Loop del menu
+while true; do
+    show_menu
+done

@@ -1,0 +1,265 @@
+<!-- Nuevo diseño 3D profesional para KING VPN - COMPLETO -->
+<!-- Colores: rose, red, blue 3D + soporte oscuro/claro -->
+<!DOCTYPE html>
+<html lang="es-AR" translate="no" data-bs-theme="light">
+
+<head>
+  <base href="/" target="_blank">
+  <meta charset="utf-8">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <meta name="google" content="notranslate">
+  <link rel="shortcut icon" href="/static/img/favicon.svg" />
+  <title>KING•VPN - Perfil</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+  <!-- Bootstrap -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/toastr.js/2.1.4/toastr.min.css" />
+
+  <!-- CSS original -->
+  <link rel="stylesheet" href="../static/css/styles.css">
+  <link rel="stylesheet" href="../static/css/bootstrap.css">
+  <link rel="stylesheet" href="../static/css/sidebar.css">
+  <link rel="stylesheet" href="../static/css/header.css">
+
+  <script src="../static/js/dark_light.js"></script>
+  <script src="//code.jquery.com/jquery-2.1.0.min.js"></script>
+
+  <!-- TOKEN -->
+  <meta name="csrf-token" content="<%= it.csrfToken %>">
+
+  <style>
+    /* ======================== NUEVO DISEÑO 3D HD ======================== */
+
+    body {
+      background: linear-gradient(135deg, #0a0a0a, #1a1a1a);
+      color: white;
+      transition: 0.3s ease-in-out;
+    }
+
+    [data-bs-theme="light"] body {
+      background: linear-gradient(135deg, rgb(240, 240, 255), white);
+      color: #111;
+    }
+
+    .card-3d {
+      background: radial-gradient(circle at top, #1f1f1f, #111);
+      border-radius: 22px;
+      padding: 20px;
+      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.6), inset 0 0 25px rgba(255, 255, 255, 0.1);
+      transform: perspective(900px) rotateX(6deg);
+      transition: 0.3s ease-in-out;
+    }
+
+    [data-bs-theme="light"] .card-3d {
+      background: radial-gradient(circle at top, white, rgb(240, 240, 255));
+      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+    }
+
+    .card-3d:hover {
+      transform: perspective(900px) rotateX(0deg) scale(1.02);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.8);
+    }
+
+    .btn-3d {
+      border: none;
+      padding: 12px 18px;
+      font-size: 1.1rem;
+      font-weight: bold;
+      border-radius: 14px;
+      box-shadow: 0 6px 15px rgba(0, 0, 0, 0.6);
+      transition: 0.2s;
+      background: linear-gradient(135deg, #ff0077, #ff3333, #0066ff);
+      color: white;
+      background-size: 300%;
+    }
+
+    .btn-3d:hover {
+      background-position: right;
+      transform: translateY(-3px);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.9);
+    }
+
+    .input-group-text {
+      background: rgba(255, 255, 255, 0.08) !important;
+      backdrop-filter: blur(10px);
+      border: none;
+      color: #ff77dd;
+    }
+
+    [data-bs-theme="light"] .input-group-text {
+      background: rgba(100, 100, 255, 0.15) !important;
+      color: #333;
+    }
+
+    .form-control {
+      border-radius: 12px;
+      border: none;
+      padding: 12px;
+      background: rgba(255, 255, 255, 0.07);
+      color: white;
+    }
+
+    [data-bs-theme="light"] .form-control {
+      background: rgba(0, 0, 0, 0.06);
+      color: #111;
+    }
+
+    textarea.form-control {
+      min-height: 190px;
+    }
+
+    .title-3d {
+      font-size: 1.8rem;
+      font-weight: bold;
+      background: linear-gradient(90deg, #ff0080, #ff3333, #3388ff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+  </style>
+</head>
+
+<body>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/toastr.js/2.1.4/toastr.min.js"></script>
+  <main class="d-flex">
+    <%~ include("./sidebar", it) %>
+    <div class="container-fluid p-0">
+      <%~ include("./header", it) %>
+
+      <div class="content pt-2 overflow-auto">
+        <div class="container-fluid d-flex w-100 align-items-center justify-content-center">
+
+          <!-- CARD NUEVO DISEÑO -->
+          <div class="card-3d" style="width: 55rem;">
+            <div class="card-body">
+
+              <div class="text-center mb-4">
+                <img class="rounded-circle shadow" src="../static/img/icon.jpg" width="120">
+                <div class="title-3d mt-3">Perfil del Usuario</div>
+              </div>
+
+              <div class="row mt-3">
+
+                <!-- Columna izquierda -->
+                <div class="col-md-6">
+
+                  <label class="form-label">ID</label>
+                  <div class="input-group mb-3">
+                    <span class="input-group-text bi bi-key-fill"></span>
+                    <input type="text" class="form-control" id="id" value="<%= it.user.id %>" readonly>
+                  </div>
+
+                  <label class="form-label">Nombre de usuario</label>
+                  <div class="input-group mb-3">
+                    <span class="input-group-text bi bi-person-fill"></span>
+                    <input type="text" class="form-control" id="username" value="<%= it.user.username %>">
+                  </div>
+
+                  <label class="form-label">GMAIL</label>
+                  <div class="input-group mb-3">
+                    <span class="input-group-text bi bi-envelope"></span>
+                    <input type="text" class="form-control" id="email" value="<%= it.user.email %>" readonly>
+                  </div>
+
+                  <label class="form-label">Contraseña</label>
+                  <div class="input-group mb-3">
+                    <span class="input-group-text bi bi-lock-fill"></span>
+                    <input type="password" class="form-control" id="password">
+                    <button class="input-group-text" onclick="showPassword()"><i class="bi bi-eye-fill"></i></button>
+                  </div>
+
+                  <label class="form-label">Confirmar contraseña</label>
+                  <div class="input-group mb-4">
+                    <span class="input-group-text bi bi-lock-fill"></span>
+                    <input type="password" class="form-control" id="confirm_password">
+                    <button class="input-group-text" onclick="showPassword()"><i class="bi bi-eye-fill"></i></button>
+                  </div>
+
+                  <button class="btn-3d w-100 __btn__save">Guardar Cambios</button>
+                </div>
+
+                <!-- Columna derecha -->
+                <div class="col-md-6">
+                  <label class="form-label">Credenciales</label>
+                  <textarea id="credentials" class="form-control mb-4" readonly></textarea>
+
+                  <button class="btn-3d w-100 __btn__copy">Copiar Credenciales</button>
+                </div>
+
+              </div>
+
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- SCRIPTS -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+  <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="../static/js/sidebar.js"></script>
+  <script src="../static/js/utils.js"></script>
+
+  <script>
+    const user_id = '<%= it.user.id %>'
+    const token = '<%= it.user.id %>'
+    let csrfToken = getCsrfTokenHead();
+
+    const credentials = document.getElementById('credentials')
+    credentials.value = JSON.stringify({ user_id, token }, null, 4)
+
+    document.querySelector('.__btn__copy').addEventListener('click', () => {
+      credentials.select();
+      document.execCommand('copy');
+      document.getSelection().removeAllRanges();
+      showToastSuccess('Copiado con éxito!');
+    })
+
+    document.querySelector('.__btn__save').addEventListener('click', async () => {
+
+      const username = document.getElementById('username').value
+      const email = document.getElementById('email').value
+      const password = document.getElementById('password').value || null
+      const confirm_password = document.getElementById('confirm_password').value || null
+
+      if (password !== confirm_password) return showToastError('Las contraseñas no coinciden!')
+      if (password && password.length < 6) return showToastError('Mínimo 6 caracteres!')
+
+      try {
+        const response = await fetch('/profile', {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'csrf-token': csrfToken
+          },
+          body: JSON.stringify({ email, username, password, confirm_password })
+        });
+
+        const csrfTokenRefresh = getCsrfTokenRefresh(response);
+        if (csrfTokenRefresh) csrfToken = csrfTokenRefresh;
+
+        if (response.status === 200) return showToastSuccess('Perfil actualizado!')
+
+        const result = await response.json();
+        if (result.message) return showToastError(result.message)
+
+      } catch {
+        showToastError('Error al guardar los datos')
+      }
+    })
+
+    function showPassword() {
+      const p1 = document.getElementById('password');
+      const p2 = document.getElementById('confirm_password');
+      const state = p1.type === 'password'
+      p1.type = p2.type = state ? 'text' : 'password'
+    }
+  </script>
+</body>
+</html>
